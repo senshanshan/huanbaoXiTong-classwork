@@ -19,6 +19,29 @@ public class AqiFeedbackServiceImpl implements IAqiFeedbackService {
 
     @Override
     public int saveAqiFeedback(AqiFeedback aqiFeedback) {
+        if (aqiFeedback == null
+                || isBlank(aqiFeedback.getTelId())
+                || !isPositive(aqiFeedback.getProvinceId())
+                || !isPositive(aqiFeedback.getCityId())
+                || isBlank(aqiFeedback.getAddress())
+                || isBlank(aqiFeedback.getInformation())
+                || !isAqiGrade(aqiFeedback.getEstimatedGrade())
+                || isBlank(aqiFeedback.getAfDate())
+                || isBlank(aqiFeedback.getAfTime())) {
+            return 0;
+        }
+        if (aqiFeedback.getAfId() != null
+                || aqiFeedback.getGmId() != null
+                || !isBlank(aqiFeedback.getAssignDate())
+                || !isBlank(aqiFeedback.getAssignTime())) {
+            return 0;
+        }
+        if (aqiFeedback.getState() == null) {
+            aqiFeedback.setState(0);
+        }
+        if (aqiFeedback.getState() != 0) {
+            return 0;
+        }
         return aqiFeedbackMapper.insert(aqiFeedback);
     }
 
@@ -65,6 +88,15 @@ public class AqiFeedbackServiceImpl implements IAqiFeedbackService {
 
     @Override
     public int updateAqiFeedbackAssign(AqiFeedback aqiFeedback) {
+        if (aqiFeedback == null
+                || !isPositive(aqiFeedback.getAfId())
+                || !isPositive(aqiFeedback.getGmId())
+                || isBlank(aqiFeedback.getAssignDate())
+                || isBlank(aqiFeedback.getAssignTime())
+                || aqiFeedback.getState() == null
+                || aqiFeedback.getState() != 1) {
+            return 0;
+        }
         UpdateWrapper<AqiFeedback> wrapper = new UpdateWrapper<>();
         wrapper.set("gm_id", aqiFeedback.getGmId());
         wrapper.set("assign_date", aqiFeedback.getAssignDate());
@@ -81,9 +113,27 @@ public class AqiFeedbackServiceImpl implements IAqiFeedbackService {
 
     @Override
     public int updateAqiFeedbackState(AqiFeedback aqiFeedback) {
+        if (aqiFeedback == null
+                || !isPositive(aqiFeedback.getAfId())
+                || aqiFeedback.getState() == null
+                || aqiFeedback.getState() != 2) {
+            return 0;
+        }
         UpdateWrapper<AqiFeedback> wrapper = new UpdateWrapper<>();
         wrapper.set("state", aqiFeedback.getState());
         wrapper.eq("af_id", aqiFeedback.getAfId());
         return aqiFeedbackMapper.update(null, wrapper);
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isPositive(Integer value) {
+        return value != null && value > 0;
+    }
+
+    private boolean isAqiGrade(Integer value) {
+        return value != null && value >= 1 && value <= 6;
     }
 }

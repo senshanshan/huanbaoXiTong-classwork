@@ -97,7 +97,7 @@
     </select>
 
     <!--2、统计总条数-->
-    <select id="getAqiFeedbackCount" parameterType="com.hw.dto.AfPageRequestDto">
+    <select id="getAqiFeedbackCount" parameterType="com.hw.dto.AfPageRequestDto" resultType="int">
         select count(*) from aqi_feedback af
         <include refid="aqiFeedbackSqlWhere"/>
     </select>

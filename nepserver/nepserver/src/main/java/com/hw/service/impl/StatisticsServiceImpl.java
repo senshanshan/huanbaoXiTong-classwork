@@ -40,6 +40,25 @@ public class StatisticsServiceImpl implements IStatisticsService {
 
     @Override
     public int saveStatistics(Statistics statistics) {
+        if (statistics == null
+                || statistics.getId() != null
+                || !isPositive(statistics.getProvinceId())
+                || !isPositive(statistics.getCityId())
+                || isBlank(statistics.getAddress())
+                || !isNonNegative(statistics.getSo2Value())
+                || !isAqiGrade(statistics.getSo2Level())
+                || !isNonNegative(statistics.getCoValue())
+                || !isAqiGrade(statistics.getCoLevel())
+                || !isNonNegative(statistics.getSpmValue())
+                || !isAqiGrade(statistics.getSpmLevel())
+                || !isAqiGrade(statistics.getAqiId())
+                || isBlank(statistics.getConfirmDate())
+                || isBlank(statistics.getConfirmTime())
+                || !isPositive(statistics.getGmId())
+                || isBlank(statistics.getFdId())
+                || isBlank(statistics.getInformation())) {
+            return 0;
+        }
         return statisticsMapper.insert(statistics);
     }
 
@@ -125,5 +144,21 @@ public class StatisticsServiceImpl implements IStatisticsService {
         Long useCity = gridCityMapper.selectCount(null);
         double rate = (useCity / (double) this.cityNumber) * 100;
         return String.format("%.2f%%", rate);
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private boolean isPositive(Integer value) {
+        return value != null && value > 0;
+    }
+
+    private boolean isNonNegative(Integer value) {
+        return value != null && value >= 0;
+    }
+
+    private boolean isAqiGrade(Integer value) {
+        return value != null && value >= 1 && value <= 6;
     }
 }
