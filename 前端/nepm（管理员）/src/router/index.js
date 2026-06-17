@@ -6,6 +6,7 @@ import FeedbackInfo from '../views/feedback/FeedbackInfo.vue'
 import AssignFeedback from '../views/feedback/AssignFeedback.vue'
 import StatisticsList from '../views/feedback/StatisticsList.vue'
 import StatisticsInfo from '../views/feedback/StatisticsInfo.vue'
+import Dashboard from '../views/statistics/Dashboard.vue'
 import ProvinceItemTotalStatis from '../views/statistics/ProvinceItemTotalStatis.vue'
 import AqiDistributeTotalStatis from '../views/statistics/AqiDistributeTotalStatis.vue'
 import AqiTrendTotalStatis from '../views/statistics/AqiTrendTotalStatis.vue'
@@ -37,6 +38,9 @@ const routes = [
       }, {
         path: '/index/statisticsInfo',
         component: StatisticsInfo
+      }, {
+        path: '/index/dashboard',
+        component: Dashboard
       }, {
         path: '/index/provinceItemTotalStatis',
         component: ProvinceItemTotalStatis
