@@ -71,11 +71,21 @@
     <!--动态条件片段-->
     <sql id="aqiFeedbackSqlWhere">
         <where>
-            <if test="provinceId!=null">af.province_id=#{provinceId}</if>
-            <if test="cityId!=null">af.city_id=#{cityId}</if>
-            <if test="estimatedGrade!=null">af.estimated_grade=#{estimatedGrade}</if>
-            <if test="afDate!=null and afDate!=''">af.af_date=#{afDate}</if>
-            <if test="state!=null">af.state=#{state}</if>
+            <if test="provinceId != null and provinceId != 0">
+                AND af.province_id = #{provinceId}
+            </if>
+            <if test="cityId != null and cityId != 0">
+                AND af.city_id = #{cityId}
+            </if>
+            <if test="estimatedGrade != null and estimatedGrade != 0">
+                AND af.estimated_grade = #{estimatedGrade}
+            </if>
+            <if test="afDate != null and afDate != ''">
+                AND af.af_date = #{afDate}
+            </if>
+            <if test="state != null">
+                AND af.state = #{state}
+            </if>
         </where>
     </sql>
 
