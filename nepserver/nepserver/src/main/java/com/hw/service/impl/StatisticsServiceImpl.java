@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,10 @@ public class StatisticsServiceImpl implements IStatisticsService {
         response.setMaxPageNum(maxPageNum);
         if (totalRow == 0) {
             response.setTotalPageNum(0);
+            response.setPreNum(pageNum);
+            response.setNextNum(pageNum);
+            response.setBeginNum(0);
+            response.setList(Collections.emptyList());
             return response;
         }
 

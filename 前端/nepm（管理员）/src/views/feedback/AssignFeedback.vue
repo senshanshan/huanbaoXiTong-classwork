@@ -9,13 +9,17 @@
       <template #extra>
         <el-button type="primary" @click="router.back()">返回</el-button>
       </template>
-      <el-descriptions-item label="公众监督反馈信息编号">{{ detail.afId || "-" }}</el-descriptions-item>
+      <el-descriptions-item label="公众监督反馈信息编号">
+        {{ detail.afId || "-" }}
+      </el-descriptions-item>
       <el-descriptions-item label="反馈信息所在地址">
         <el-tag size="small">{{ detail.gridProvince?.provinceName || "-" }}</el-tag>
         <el-tag size="small">{{ detail.gridCity?.cityName || "-" }}</el-tag>
         <el-tag size="small">{{ detail.address || "-" }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="反馈信息描述">{{ detail.information || "-" }}</el-descriptions-item>
+      <el-descriptions-item label="反馈信息描述">
+        {{ detail.information || "-" }}
+      </el-descriptions-item>
       <el-descriptions-item label="预估等级">
         <el-tag size="small">{{ detail.aqi?.chineseExplain || detail.estimatedGrade || "-" }}</el-tag>
         <el-tag size="small">{{ detail.aqi?.aqiExplain || "-" }}</el-tag>
@@ -33,14 +37,38 @@
         </el-form-item>
       </el-form>
 
+      <el-alert
+        v-if="!isRemote && !localMembers.length"
+        class="member-alert"
+        type="warning"
+        :closable="false"
+        show-icon
+        title="该反馈所在区域暂无可用网格员，请先维护网格员数据，或开启异地指派。"
+      />
+
       <el-form v-if="!isRemote" :inline="true" size="small">
         <el-form-item label="指派给">
-          <el-select v-model="form.gmId" placeholder="请选择网格员" style="width: 220px">
-            <el-option v-for="member in localMembers" :key="member.gmId" :label="memberText(member)" :value="member.gmId" />
+          <el-select
+            v-model="form.gmId"
+            placeholder="请选择网格员"
+            empty-text="该区域暂无可用网格员"
+            style="width: 220px"
+          >
+            <el-option
+              v-for="member in localMembers"
+              :key="member.gmId"
+              :label="memberText(member)"
+              :value="member.gmId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-popconfirm title="确定要指派给该网格员吗？" confirm-button-text="确定" cancel-button-text="取消" @confirm="submit">
+          <el-popconfirm
+            title="确定要指派给该网格员吗？"
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            @confirm="submit"
+          >
             <template #reference>
               <el-button type="primary" :loading="submitting">本地指派</el-button>
             </template>
@@ -50,22 +78,57 @@
 
       <el-form v-else :inline="true" size="small">
         <el-form-item label="省区域">
-          <el-select v-model="remote.provinceId" placeholder="请选择省" style="width: 140px" @change="changeRemoteProvince">
-            <el-option v-for="province in provinces" :key="province.provinceId" :label="province.provinceName" :value="province.provinceId" />
+          <el-select
+            v-model="remote.provinceId"
+            placeholder="请选择省"
+            style="width: 140px"
+            @change="changeRemoteProvince"
+          >
+            <el-option
+              v-for="province in provinces"
+              :key="province.provinceId"
+              :label="province.provinceName"
+              :value="province.provinceId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="市区域">
-          <el-select v-model="remote.cityId" placeholder="请选择市" style="width: 140px" @change="loadRemoteMembers">
-            <el-option v-for="city in remoteCities" :key="city.cityId" :label="city.cityName" :value="city.cityId" />
+          <el-select
+            v-model="remote.cityId"
+            placeholder="请选择市"
+            style="width: 140px"
+            @change="loadRemoteMembers"
+          >
+            <el-option
+              v-for="city in remoteCities"
+              :key="city.cityId"
+              :label="city.cityName"
+              :value="city.cityId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="异地指派给">
-          <el-select v-model="form.gmId" placeholder="请选择网格员" style="width: 220px">
-            <el-option v-for="member in remoteMembers" :key="member.gmId" :label="memberText(member)" :value="member.gmId" />
+          <el-select
+            v-model="form.gmId"
+            placeholder="请选择网格员"
+            empty-text="该区域暂无可用网格员"
+            style="width: 220px"
+          >
+            <el-option
+              v-for="member in remoteMembers"
+              :key="member.gmId"
+              :label="memberText(member)"
+              :value="member.gmId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-popconfirm title="确定要异地指派给该网格员吗？" confirm-button-text="确定" cancel-button-text="取消" @confirm="submit">
+          <el-popconfirm
+            title="确定要异地指派给该网格员吗？"
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            @confirm="submit"
+          >
             <template #reference>
               <el-button type="primary" :loading="submitting">异地指派</el-button>
             </template>
@@ -96,21 +159,27 @@ const isRemote = ref(false);
 const form = reactive({ gmId: null });
 const remote = reactive({ provinceId: null, cityId: null });
 
-const remoteCities = computed(() => cities.value.filter((city) => city.provinceId === remote.provinceId));
+const remoteCities = computed(() =>
+  cities.value.filter((city) => city.provinceId === remote.provinceId)
+);
 
 const pad = (num) => String(num).padStart(2, "0");
 const nowDateTime = () => {
   const date = new Date();
   return {
     assignDate: `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-    assignTime: `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+    assignTime: `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`,
   };
 };
 
-const memberText = (member) => `${member.gmName || "-"}（${member.gmCode || member.tel || "无编号"}）`;
+const memberText = (member) =>
+  `${member.gmName || "-"}（${member.gmCode || member.tel || "无编号"}）`;
 
 const loadRegions = async () => {
-  const [provinceRes, cityRes] = await Promise.all([axios.post("gridProvince/list"), axios.post("gridCity/list")]);
+  const [provinceRes, cityRes] = await Promise.all([
+    axios.post("gridProvince/list"),
+    axios.post("gridCity/list"),
+  ]);
   provinces.value = provinceRes.data || [];
   cities.value = cityRes.data || [];
 };
@@ -120,13 +189,15 @@ const loadMembers = async (provinceId, cityId) => {
   const res = await axios.post("gridMember/ListGridMemberByProvinceId", {
     provinceId,
     cityId,
-    state: 1
+    state: 1,
   });
   return res.data || [];
 };
 
 const loadDetail = async () => {
-  const res = await axios.post("aqiFeedback/getAqiFeedbackById", { afId: Number(route.query.afId) });
+  const res = await axios.post("aqiFeedback/getAqiFeedbackById", {
+    afId: Number(route.query.afId),
+  });
   detail.value = res.data || {};
   form.gmId = detail.value.gmId || null;
   remote.provinceId = detail.value.provinceId || null;
@@ -166,7 +237,7 @@ const submit = async () => {
       afId: detail.value.afId,
       gmId: form.gmId,
       state: 1,
-      ...nowDateTime()
+      ...nowDateTime(),
     });
     if (Number(res.data) > 0) {
       myElMessage?.("指派成功", "success");
@@ -204,6 +275,10 @@ onMounted(async () => {
 .detail,
 .assign-card {
   margin-top: 18px;
+}
+
+.member-alert {
+  margin-bottom: 14px;
 }
 
 .detail :deep(.el-tag) {
