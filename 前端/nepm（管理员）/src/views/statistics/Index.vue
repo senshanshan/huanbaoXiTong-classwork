@@ -20,6 +20,11 @@
           router
           text-color="#fff"
         >
+          <el-menu-item index="/index/dashboard" @click="onMenuItemClick">
+            <el-icon><DataAnalysis /></el-icon>
+            <span>仪表盘</span>
+          </el-menu-item>
+
           <el-sub-menu index="feedback">
             <template #title>
               <el-icon><ChatDotRound /></el-icon>
@@ -57,7 +62,7 @@
 </template>
 
 <script setup>
-import { ArrowLeft, ArrowRight, ChatDotRound, DocumentCopy, Phone } from "@element-plus/icons-vue";
+import { ArrowLeft, ArrowRight, ChatDotRound, DataAnalysis, DocumentCopy, Phone } from "@element-plus/icons-vue";
 import { getSessionStorage } from "../../common.js";
 import { onMounted, onUnmounted, ref } from "vue";
 
