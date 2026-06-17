@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hw.mapper.AqiFeedbackMapper">
+    <!--结果映射：多表关联resultMap-->
+    <resultMap id="aqiFeedbackResultMap" type="com.hw.po.AqiFeedback">
+        <id property="afId" column="af_id"/>
+        <result property="telId" column="tel_id"/>
+        <result property="provinceId" column="province_id"/>
+        <result property="cityId" column="city_id"/>
+        <result property="address" column="address"/>
+        <result property="information" column="information"/>
+        <result property="estimatedGrade" column="estimated_grade"/>
+        <result property="afDate" column="af_date"/>
+        <result property="afTime" column="af_time"/>
+        <result property="gmId" column="gm_id"/>
+        <result property="assignDate" column="assign_date"/>
+        <result property="assignTime" column="assign_time"/>
+        <result property="state" column="state"/>
+        <result property="remarks" column="remarks"/>
+
+        <!--关联监督员Supervisor-->
+        <association property="supervisor" javaType="com.hw.po.Supervisor">
+            <id property="telId" column="su_tel_id"/>
+            <result property="realName" column="su_real_name"/>
+            <result property="birthday" column="su_birthday"/>
+            <result property="sex" column="su_sex"/>
+        </association>
+        <!--关联省份GridProvince-->
+        <association property="gridProvince" javaType="com.hw.po.GridProvince">
+            <id property="provinceId" column="gp_province_id"/>
+            <result property="provinceName" column="gp_province_name"/>
+            <result property="provinceAbbr" column="gp_province_abbr"/>
+        </association>
+        <!--关联城市GridCity-->
+        <association property="gridCity" javaType="com.hw.po.GridCity">
+            <id property="cityId" column="gc_city_id"/>
+            <result property="cityName" column="gc_city_name"/>
+        </association>
+        <!--关联空气质量Aqi-->
+        <association property="aqi" javaType="com.hw.po.Aqi">
+            <id property="aqiId" column="aq_aqi_id"/>
+            <result property="chineseExplain" column="aq_chinese_explain"/>
+            <result property="color" column="aq_color"/>
+            <result property="aqiExplain" column="aq_aqi_explain"/>
+        </association>
+        <!--关联网格员GridMember-->
+        <association property="gridMember" javaType="com.hw.po.GridMember">
+            <id property="gmId" column="gm_gm_id"/>
+            <result property="gmName" column="gm_gm_name"/>
+            <result property="tel" column="gm_tel"/>
+        </association>
+    </resultMap>
+
+    <!--公用SQL片段：多表联查-->
+    <sql id="aqiFeedbackSqlSelect">
+        select af.*,
+        gm.gm_id gm_gm_id,gm.gm_name gm_gm_name,gm.tel gm_tel,
+        su.tel_id su_tel_id,su.real_name su_real_name,su.birthday su_birthday,su.sex su_sex,
+        gp.province_id gp_province_id,gp.province_name gp_province_name,gp.province_abbr gp_province_abbr,
+        gc.city_id gc_city_id,gc.city_name gc_city_name,
+        aq.aqi_id aq_aqi_id,aq.chinese_explain aq_chinese_explain,aq.color aq_color,aq.aqi_explain aq_aqi_explain
+        from aqi_feedback af
+        left join grid_member gm on af.gm_id=gm.gm_id
+        left join supervisor su on af.tel_id=su.tel_id
+        left join grid_province gp on af.province_id=gp.province_id
+        left join grid_city gc on af.city_id=gc.city_id
+        left join aqi aq on af.estimated_grade=aq.aqi_id
+    </sql>
+
+    <!--动态条件片段-->
+    <sql id="aqiFeedbackSqlWhere">
+        <where>
+            <if test="provinceId!=null">af.province_id=#{provinceId}</if>
+            <if test="cityId!=null">af.city_id=#{cityId}</if>
+            <if test="estimatedGrade!=null">af.estimated_grade=#{estimatedGrade}</if>
+            <if test="afDate!=null and afDate!=''">af.af_date=#{afDate}</if>
+            <if test="state!=null">af.state=#{state}</if>
+        </where>
+    </sql>
+
+    <!--1、手机号查询-->
+    <select id="ListAqiFeedbackByTelId" parameterType="String" resultMap="aqiFeedbackResultMap">
+        <include refid="aqiFeedbackSqlSelect"/>
+        where af.tel_id =#{telId}
+        order by af.af_date desc,af.af_time desc
+    </select>
+
+    <!--2、统计总条数-->
+    <select id="getAqiFeedbackCount" parameterType="com.hw.dto.AfPageRequestDto">
+        select count(*) from aqi_feedback af
+        <include refid="aqiFeedbackSqlWhere"/>
+    </select>
+
+    <!--3、分页列表-->
+    <select id="ListAqiFeedbackPage" parameterType="com.hw.dto.AfPageRequestDto" resultMap="aqiFeedbackResultMap">
+        <include refid="aqiFeedbackSqlSelect"/>
+        <include refid="aqiFeedbackSqlWhere"/>
+        order by af.af_id desc
+        limit #{beginNum},#{maxPageNum}
+    </select>
+
+    <!--4、ID查询单条-->
+    <select id="getAqiFeedbackById" parameterType="Integer" resultMap="aqiFeedbackResultMap">
+        <include refid="aqiFeedbackSqlSelect"/>
+        where af.af_id=#{afId}
+    </select>
+
+    <!--5、网格员ID+状态查询-->
+    <select id="ListAqiFeedbackByGmId" parameterType="com.hw.po.AqiFeedback" resultMap="aqiFeedbackResultMap">
+        <include refid="aqiFeedbackSqlSelect"/>
+        where af.gm_id=#{gmId} and af.state=#{state}
+        order by af.af_date,af.af_time
+    </select>
+</mapper>
